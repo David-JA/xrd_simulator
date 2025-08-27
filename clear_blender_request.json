@@ -1,0 +1,9 @@
+{
+  "method": "tools/call",
+  "params": {
+    "name": "execute_python_in_blender",
+    "arguments": {
+      "code": "import bpy\n\n# 确保处于对象模式\nif bpy.context.mode != 'OBJECT':\n    bpy.ops.object.mode_set(mode='OBJECT')\n\n# 选择所有网格物体\nbpy.ops.object.select_all(action='DESELECT')\nfor obj in bpy.context.scene.objects:\n    if obj.type == 'MESH':\n        obj.select_set(True)\n\n# 删除选中的物体\nbpy.ops.object.delete(use_global=False)\n\nprint('场景中的所有网格物体已清空！')"
+    }
+  }
+}
