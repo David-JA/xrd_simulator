@@ -15,6 +15,16 @@ apply the motion to a pointcloud and save the motion to disc:
 
 Below follows a detailed description of the RigidBodyMotion class attributes
 and functions.
+运动模块用于表示刚体运动。在 :class:`xrd_simulator.polycrystal.Polycrystal` 的衍射过程中，
+:class:`xrd_simulator.motion.RigidBodyMotion` 对象描述了样品如何平移和旋转。该运动可通过
+:func:`xrd_simulator.polycrystal.Polycrystal.transform` 函数来更新多晶体的位置。
+
+以下是如何实例化一个刚体运动对象、将运动应用于点云并将运动保存到磁盘的最小示例：
+
+    示例：
+        .. literalinclude:: examples/example_init_motion.py
+
+下面是 RigidBodyMotion 类属性和函数的详细描述。
 """
 
 import dill
@@ -60,7 +70,28 @@ class RigidBodyMotion:
         Translation vector, shape ``(3,)``.
     origin : torch.Tensor
         Point in space about which the rigid body motion is defined,
-        shape ``(3,)``.
+        shape ``(3,)``.            
+    通过欧拉轴旋转和平移对欧几里得点进行刚体变换。
+
+    刚体运动在实验室坐标系中定义。
+
+    该运动在时间区间 time=[0,1] 内是参数化的，它通过将点x从[0, rotation_angle]进行线性均匀旋转，
+    并从[0, translation]进行平移来执行刚体变换。也就是说，如果在时间 t 调用，运动将首先围绕 `rotation_axis` 
+    旋转点 `t*rotation_angle` 弧度，然后通过向量 `t*translation` 平移该点。
+
+    参数：
+        rotation_axis (:obj:`numpy array`): 旋转轴，形状为 ``shape=(3,)``
+        rotation_angle (:obj:`float`): 最终旋转的弧度值，当 time=1 时。
+        translation (:obj:`numpy array`): 平移向量，形状为 ``shape=(3,)``
+        origin (:obj:`numpy array`): 定义刚体运动的空间点，默认为原点 (0,0,0)。
+            所有平移都相对于此原点执行，所有旋转也都是围绕此原点的旋转。形状为 ``shape=(3,)``
+
+    属性：
+        rotation_axis (:obj:`numpy array`): 旋转轴，形状为 ``shape=(3,)``
+        rotation_angle (:obj:`float`): 最终旋转的弧度值，当 time=1 时。
+        translation (:obj:`numpy array`): 平移向量，形状为 ``shape=(3,)``
+        origin (:obj:`numpy array`): 定义刚体运动的空间点，默认为原点 (0,0,0)。
+            所有平移都相对于此原点执行，所有旋转也都是围绕此原点的旋转。形状为 ``shape=(3,)``
     """
 
     def __init__(
@@ -68,7 +99,7 @@ class RigidBodyMotion:
     ):
         assert (
             rotation_angle < torch.pi and rotation_angle > 0
-        ), "The rotation angle must be in [0 pi]"
+        ), "The rotation angle must be in [0 pi]" # 旋转角度必须在 [0, pi] 范围内
         self.rotator = _RodriguezRotator(rotation_axis)
         self.rotation_axis = ensure_torch(rotation_axis)
         self.rotation_angle = ensure_torch(rotation_angle)
@@ -96,7 +127,7 @@ class RigidBodyMotion:
             Transformed vectors with shape ``(3, N)``, ``(N, 3)``, or
             ``(N, 4, 3)``.
         """
-        # assert time <= 1 and time >= 0, "The rigid body motion is only valid on the interval time=[0,1]"
+        # assert time <= 1 and time >= 0, "The rigid body motion is only valid on the interval time=[0,1]" # 刚体运动仅在时间区间 time=[0,1] 内有效
         vectors = ensure_torch(vectors)
         time = ensure_torch(time)
 
@@ -112,7 +143,7 @@ class RigidBodyMotion:
 
         elif len(vectors.shape) == 2:
             translation = self.translation.reshape(1, 3)
-            origin = self.origin.reshape(1, 3)
+            origin = self.origin.reshape(1, 3) 
             centered_vectors = vectors - origin
             centered_rotated_vectors = self.rotator(
                 centered_vectors, self.rotation_angle * time
@@ -161,6 +192,17 @@ class RigidBodyMotion:
         -------
         torch.Tensor
             Transformed vectors of shape ``(3, N)`` or ``(N, 3)``.
+                    在指定时间找到一组向量的旋转变换。
+
+        注意：此函数仅应用刚体旋转，而不会考虑运动的原点！此函数旨在用于衍射向量
+        和波向量的旋转。要执行考虑原点的物理刚体运动，请使用 __call__ 方法。
+
+        参数：
+            vectors (:obj:`numpy array`): 要旋转的3D欧几里得空间中的点集，形状为 (``shape=(3,N)``)
+            time (:obj:`float`): 用于计算的时间点。
+
+        返回：
+            变换后的向量 (:obj:`numpy array`)，形状为 ``shape=(3,N)``。
         """
         # assert time <= 1 and time >= 0, "The rigid body motion is only valid on the interval time=[0,1]"
         time = ensure_torch(time)
@@ -184,6 +226,16 @@ class RigidBodyMotion:
         -------
         torch.Tensor
             Transformed vectors of shape ``(3, N)`` or ``(N, 3)``.
+        在指定时间找到一组点的平移变换。
+
+        注意：此函数仅应用刚体平移。
+
+        参数：
+            vectors (:obj:`numpy array`): 要旋转的3D欧几里得空间中的点集，形状为 (``shape=(3,N)``)
+            time (:obj:`float`): 用于计算的时间点。
+
+        返回：
+            变换后的向量 (:obj:`numpy array`)，形状为 ``shape=(3,N)``。
         """
         assert (
             time <= 1 and time >= 0
@@ -208,6 +260,10 @@ class RigidBodyMotion:
         -------
         RigidBodyMotion
             The inverse motion with a reversed rotation and translation.
+        创建一个逆运动的实例，由负的平移向量和负的旋转轴向量定义。
+
+        返回：
+            (:obj:`xrd_simulator.RigidBodyMotion`) 具有相反旋转和平移的逆运动对象。
         """
         return RigidBodyMotion(
             -self.rotation_axis.clone(),
@@ -255,6 +311,15 @@ class RigidBodyMotion:
         module is not intended to be secure against erroneous or maliciously
         constructed data. Never unpickle data received from an untrusted or
         unauthenticated source.
+                    从磁盘加载运动对象（通过 pickling）。
+
+        参数：
+            path (:obj:`str`): 用于加载的文件路径，以所需的文件名结尾。
+
+        .. 警告::
+            此函数将从提供的路径中反序列化（unpickle）数据。pickle 模块
+            不能保证免受错误或恶意构造的数据的攻击。
+            永远不要反序列化从不受信任或未经身份验证的来源接收的数据。
         """
         if not path.endswith(".motion"):
             raise ValueError("The loaded motion file must end with .motion")
@@ -277,7 +342,17 @@ class _RodriguezRotator(object):
     K : torch.Tensor
         Skew-symmetric cross-product matrix, shape ``(3, 3)``.
     K2 : torch.Tensor
-        Square of the skew-symmetric matrix, shape ``(3, 3)``.
+        Square of the skew-symmetric matrix, shape ``(3, 3)``.        
+    用于在由单位法线 `rotation_axis` 描述的平面中旋转向量的对象。
+
+    参数：
+        rotation_axis (:obj:`numpy array`): 3D欧几里得空间中的单位向量，形状为 (``shape=(3,)``)
+
+    属性：
+        rotation_axis (:obj:`numpy array`): 3D欧几里得空间中的单位向量，形状为 (``shape=(3,)``)
+        K (:obj:`numpy array`): 形状为 (``shape=(3,3)``)
+        K2 (:obj:`numpy array`): 形状为 (``shape=(3,3)``)
+        I (:obj:`numpy array`): 形状为 (``shape=(3,3)``)
     """
 
     def __init__(self, rotation_axis):
