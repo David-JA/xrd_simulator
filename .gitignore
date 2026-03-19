@@ -165,3 +165,5 @@ docs/source/examples/test_artifacts/
 
 # Test reports (images and outputs from tests)
 tests/test_reports/
+
+*.png
