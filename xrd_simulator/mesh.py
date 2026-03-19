@@ -1,3 +1,11 @@
+'''
+Author       : 郑竞超
+Date         : 2025-03-10 10:25:32
+LastEditTime : 2026-03-19 16:29:06
+LastEditors  : 郑竞超
+Description  : 
+FilePath     : mesh.py
+'''
 """The mesh module is used to represent the morphology of a polycrystalline sample.
 
 Once created and linked to a polycrystal, the mesh can be accessed directly

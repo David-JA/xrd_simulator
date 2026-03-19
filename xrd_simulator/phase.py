@@ -1,3 +1,11 @@
+'''
+Author       : 郑竞超
+Date         : 2025-03-10 10:25:32
+LastEditTime : 2026-03-19 16:37:45
+LastEditors  : 郑竞超
+Description  : 
+FilePath     : phase.py
+'''
 """The phase module is used to represent material phase.
 
 Each element of the :class:`xrd_simulator.polycrystal.Polycrystal` mesh is

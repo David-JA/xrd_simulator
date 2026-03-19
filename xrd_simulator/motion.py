@@ -1,10 +1,15 @@
-"""The motion module is used to represent a rigid body motion.
-
-During diffraction from a :class:`xrd_simulator.polycrystal.Polycrystal`, the
-:class:`xrd_simulator.motion.RigidBodyMotion` object describes how the sample
-is translating and rotating. The motion can be used to update the polycrystal
-position via the :func:`xrd_simulator.polycrystal.Polycrystal.transform`
-function.
+'''
+Author       : 郑竞超
+Date         : 2025-03-10 10:25:32
+LastEditTime : 2026-03-19 16:29:28
+LastEditors  : 郑竞超
+Description  : 
+FilePath     : motion.py
+'''
+"""The motion module is used to represent a rigid body motion. During diffraction from a
+:class:`xrd_simulator.polycrystal.Polycrystal` the :class:`xrd_simulator.motion.RigidBodyMotion`
+object describes how the sample is translating and rotating. The motion can be used to update the
+polycrystal position via the :func:`xrd_simulator.polycrystal.Polycrystal.transform` function.
 
 Examples
 --------

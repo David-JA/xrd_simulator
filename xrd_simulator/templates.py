@@ -1,3 +1,11 @@
+'''
+Author       : 郑竞超
+Date         : 2025-03-10 10:25:32
+LastEditTime : 2026-03-19 16:32:28
+LastEditors  : 郑竞超
+Description  : 
+FilePath     : templates.py
+'''
 """Templates module for fast creation of sample types and diffraction geometries.
 
 The ``templates`` module allows for fast creation of a few select sample types

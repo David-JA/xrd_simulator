@@ -1,3 +1,11 @@
+'''
+Author       : 郑竞超
+Date         : 2025-03-10 10:25:32
+LastEditTime : 2026-03-19 16:32:42
+LastEditors  : 郑竞超
+Description  : 
+FilePath     : utils.py
+'''
 """
 General internal package utility functions.
 

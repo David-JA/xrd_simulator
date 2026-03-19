@@ -23,7 +23,7 @@ beam = Beam(
         [5e6, -beam_edge, -beam_edge], [5e6, beam_edge, -beam_edge], [5e6, beam_edge, beam_edge], [5e6, -beam_edge, beam_edge]
     ]),
     xray_propagation_direction=np.array([1., 0., 0.]),
-    wavelength=0.1258,
+    wavelength=0.1256,
     polarization_vector=np.array([0., 1., 0.])
 )
 detector_distance_mm = 1324.9
